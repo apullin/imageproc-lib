@@ -38,7 +38,7 @@
 ;                                  2010-7-23    Full assembly implementation
 ;
 
-#include p33Fxxxx.inc
+#include p33Exxxx.inc
 
 ; Symbol definitions
 .equiv  time, w0

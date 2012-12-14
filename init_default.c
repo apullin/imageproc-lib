@@ -39,7 +39,7 @@
  *
  */
 
-#include "p33Exxxx.h"
+#include <p33Exxxx.h>
 #include "adc.h"
 
 
@@ -110,8 +110,12 @@ void SetupPorts(void)
 {
     // Disabling all potential ADC AIO's to enable DIO's
     // (will enable the needed ones in SetupADC())
+#ifdef __dsPIC33F__
     AD1PCFGL = ENABLE_ALL_DIG_0_15;
     AD2PCFGL = ENABLE_ALL_DIG_0_15;
+#elif defined __dsPIC33E__
+    ANSELB = ANSELC = ANSELD = ANSELE = ANSELG = 0x0000;
+#endif
 
 #if defined(__IMAGEPROC1)
 
