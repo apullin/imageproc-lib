@@ -39,7 +39,7 @@
  *
  */
 
-#include <p33Exxxx.h>
+#include <xc.h>
 #include "adc.h"
 
 

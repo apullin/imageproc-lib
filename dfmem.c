@@ -48,7 +48,7 @@
  *  - Uses an SPI port for communicating with the memory chip.
  */
 
-#include "p33Exxxx.h"
+#include <xc.h>
 #include "spi.h"
 #include "dfmem.h"
 #include "utils.h"

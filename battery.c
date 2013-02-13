@@ -45,7 +45,7 @@
 
 #include "battery.h"
 #include "ports.h"
-#include "p33Exxxx.h"
+#include <xc.h>
 //#include "pwm.h"
 #include "utils.h"
 #include <stdlib.h>
