@@ -45,6 +45,7 @@
 #include "spi.h"
 #include "timer.h"
 #include "dma.h"
+#include "init_default.h"
 
 #include <string.h>
 
@@ -77,13 +78,10 @@
 #define SPIC1_RX_BUFF_LEN       (128) // Radio buffer is 128 bytes
 #define SPIC1_TX_BUFF_LEN       (128)
 
-#define SPIC2_RX_BUFF_LEN       (264) // Flash page is 264/528 bytes
-#define SPIC2_TX_BUFF_LEN       (264) // Currently not in use
+#define SPIC2_RX_BUFF_LEN       (528) // Flash page is 264/528 bytes
+#define SPIC2_TX_BUFF_LEN       (528) // Currently not in use
 
 #define US_TO_TICKS(X)          ((X*10)/16) // Microseconds to cycles with 64:1 prescale
-
-// TODO: Move this into some generics.h !!
-#define FCY                     (40000000)
 
 #define SPI_CS_ACTIVE           (0)
 #define SPI_CS_IDLE             (1)
@@ -105,7 +103,7 @@ static void setupDMASet2(void);
 static SpicIrqHandler int_handler[SPIC_NUM_PORTS];
 
 /** Current port statuses */
-static SpicStatus port_status[SPIC_NUM_PORTS];
+static volatile SpicStatus port_status[SPIC_NUM_PORTS];
 
 // Port 1 buffers
 static unsigned char spic1_rx_buff[SPIC1_RX_BUFF_LEN] __attribute__((space(dma)));
@@ -350,6 +348,7 @@ void __attribute__((interrupt, no_auto_psv)) _DMA4Interrupt(void) {
 // Currently not used, though it may be useful for debugging
 void __attribute__((interrupt, no_auto_psv)) _DMA5Interrupt(void) {
 
+    //int_handler[1](SPIC_TRANS_SUCCESS);        // Call registered callback function
     _DMA5IF = 0;
 
 }
@@ -371,7 +370,7 @@ static void setupDMASet1(void) {
     DMA2CNT = 0; // Default
 
     // Need this to avoid compiler bitlength issues
-    unsigned long priority = DMA2_INT_PRI_5;
+    unsigned long priority = DMA2_INT_PRI_6;
     SetPriorityIntDMA2(priority);
 
     EnableIntDMA2;
@@ -391,9 +390,9 @@ static void setupDMASet1(void) {
     DMA3PAD = (volatile unsigned int) &SPI1BUF;
     DMA3CNT = 0; // Default
 
-    priority = DMA3_INT_PRI_5;
+    priority = DMA3_INT_PRI_6;
     SetPriorityIntDMA3(priority);
-    DisableIntDMA3;             // Only need one of the DMA interrupts
+    EnableIntDMA3;             // Only need one of the DMA interrupts
     _DMA3IF  = 0;        // Clear DMA interrupt
 
 }
@@ -415,7 +414,7 @@ static void setupDMASet2(void) {
     DMA4CNT = 0; // Default
 
     // Need this to avoid compiler bitlength issues
-    unsigned long priority = DMA4_INT_PRI_5;
+    unsigned long priority = DMA4_INT_PRI_6;
     SetPriorityIntDMA4(priority);
 
     EnableIntDMA4;
@@ -435,7 +434,7 @@ static void setupDMASet2(void) {
     DMA5PAD = (volatile unsigned int) &SPI2BUF;
     DMA5CNT = 0; // Default
 
-    priority = DMA5_INT_PRI_5;
+    priority = DMA5_INT_PRI_6;
     SetPriorityIntDMA5(priority);
     DisableIntDMA5; // Only need one of the DMA interrupts
     _DMA5IF  = 0;        // Clear DMA interrupt

@@ -43,6 +43,7 @@
 #include "utils.h"
 #include <stdlib.h>     // for malloc
 #include <stdarg.h>     // variable number of arguments
+#include <string.h>     // for memcpy
 
 #define STATUS_POS              0
 #define TYPE_POS                1
@@ -59,16 +60,22 @@ Payload payCreate(unsigned char data_length, unsigned char *data,
 
 
 Payload payCreateEmpty(unsigned char data_length){
-    Payload pld = (Payload)malloc(sizeof(PayloadStruct));
-	if(pld == NULL) {
-		return NULL;
-	}
+    int stemp = sizeof(PayloadStruct);
+    void* temp = malloc(stemp);
+    Payload pld;
+    if(temp == NULL){
+        while(1); //critical error, not possible to recover
+        return NULL;
+    }
+    pld = (Payload)temp;
     
-    unsigned char* data = (unsigned char*)malloc(data_length + PAYLOAD_HEADER_LENGTH);
-	if(data == NULL) {
-		free(pld);
-		return NULL;
-	}
+    temp = malloc(data_length + PAYLOAD_HEADER_LENGTH);
+    if(temp == NULL) {
+            free(pld);
+            return NULL;
+    }
+    unsigned char* data = temp;
+
     pld->pld_data = data;
     pld->data_length = data_length;
     pld->iter_index = 0;
@@ -102,10 +109,11 @@ unsigned char* payToString(Payload pld) {
 
 void payAppendData(Payload pld, char loc, 
                 unsigned char data_length, unsigned char *data) {
-    while(data_length--) {
-        pld->pld_data[PAYLOAD_HEADER_LENGTH + loc++] = *(data++);
-    }
-
+    //while(data_length--) {
+    //    pld->pld_data[PAYLOAD_HEADER_LENGTH + loc++] = *(data++);
+    //}
+    memcpy(pld->pld_data + PAYLOAD_HEADER_LENGTH + loc, data, data_length);
+    pld->iter_index += data_length;
 }
 
 void payWriteByte(Payload pld, unsigned char loc, unsigned char data) {

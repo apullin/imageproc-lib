@@ -5,8 +5,8 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>include/ams-enc.h</itemPath>
-      <itemPath>include/at86rf.h</itemPath>
       <itemPath>include/at86rf231.h</itemPath>
+      <itemPath>include/at86rf231_driver.h</itemPath>
       <itemPath>include/attitude.h</itemPath>
       <itemPath>include/bams.h</itemPath>
       <itemPath>include/battery.h</itemPath>
@@ -32,6 +32,7 @@
       <itemPath>include/payload_queue.h</itemPath>
       <itemPath>include/pid.h</itemPath>
       <itemPath>include/pid_hw.h</itemPath>
+      <itemPath>include/ppool.h</itemPath>
       <itemPath>include/progmem.h</itemPath>
       <itemPath>include/quat.h</itemPath>
       <itemPath>include/queue.h</itemPath>
@@ -39,9 +40,11 @@
       <itemPath>include/sclock.h</itemPath>
       <itemPath>include/spi_controller.h</itemPath>
       <itemPath>include/utils.h</itemPath>
+      <itemPath>include/version-string.h</itemPath>
       <itemPath>include/version.h</itemPath>
       <itemPath>include/wii.h</itemPath>
       <itemPath>include/xl.h</itemPath>
+      <itemPath>include/led.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -51,7 +54,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>src/ams-enc.c</itemPath>
-      <itemPath>src/at86rf.c</itemPath>
+      <itemPath>src/at86rf231_driver.c</itemPath>
       <itemPath>src/attitude.c</itemPath>
       <itemPath>src/bams.c</itemPath>
       <itemPath>src/battery.c</itemPath>
@@ -68,6 +71,7 @@
       <itemPath>src/ipspi1.c</itemPath>
       <itemPath>src/larray.c</itemPath>
       <itemPath>src/lcd.c</itemPath>
+      <itemPath>src/mac_packet.c</itemPath>
       <itemPath>src/mpu6050.c</itemPath>
       <itemPath>src/ovcam.c</itemPath>
       <itemPath>src/packet_queue.c</itemPath>
@@ -75,6 +79,7 @@
       <itemPath>src/payload_queue.c</itemPath>
       <itemPath>src/pid.c</itemPath>
       <itemPath>src/pid_hw.c</itemPath>
+      <itemPath>src/ppool.c</itemPath>
       <itemPath>src/progmem.c</itemPath>
       <itemPath>src/quat.c</itemPath>
       <itemPath>src/queue.c</itemPath>
@@ -84,6 +89,8 @@
       <itemPath>src/version.c</itemPath>
       <itemPath>src/wii.c</itemPath>
       <itemPath>src/xl.c</itemPath>
+      <itemPath>src/delay.s</itemPath>
+      <itemPath>src/ovcamHS.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -159,6 +166,23 @@
         <property key="use-cci" value="false"/>
       </C30>
       <C30-AS>
+        <property key="assembler-symbols" value=""/>
+        <property key="expand-macros" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="false-conditionals" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-section-info" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="oXC16asm-extra-opts" value=""/>
+        <property key="oXC16asm-list-to-file" value="false"/>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="relax" value="false"/>
+        <property key="warning-level" value="emit-warnings"/>
       </C30-AS>
       <C30-LD>
       </C30-LD>
