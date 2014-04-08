@@ -110,7 +110,7 @@ static void waitDmaFinish(void);
 void mpuSetup(void) {
 
   // setup SPI port
-  setupSPI(MPU_CS);  // Setup SPI for register configuration
+  setupSPI(1);  // Setup SPI for register configuration
   unsigned char reg;
 
   writeReg(MPU_REG_PMGT1, 0x83);              //Reset IMU
@@ -137,8 +137,8 @@ void mpuSetup(void) {
   writeReg(MPU_REG_CONFIG, 0);              // Set frame sync and DLPF off
   writeReg(MPU_REG_PMGT2, 0b00000000);        // Activate all sensors
 
-  setupSPI(0);  // Setup SPI for highspeed data readback. Can do 20MHz, set for 13
-
+  //setupSPI(0);  // Setup SPI for highspeed data readback. Can do 20MHz, set for 13
+    setupSPI(1); //slow spi for debug
   mpuRunCalib(1000, 1000);
 }
 

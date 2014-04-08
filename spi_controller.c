@@ -183,6 +183,7 @@ int spic2BeginTransaction(unsigned char cs) {
       // Two CS lines are supported
       return -1;
 
+
     spi_port_ch2_lock(); // Wait for port to become available
     // Reconfigure port
     SPI2STAT = 0;
