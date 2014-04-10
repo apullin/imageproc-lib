@@ -137,6 +137,7 @@ static unsigned int nextPage = 0;
 
 static unsigned char* readoutLocation = NULL;
 static unsigned int expectedReadbackSize = 0;
+static char _exit_block = 0;
 
 enum FlashSizeType {
     DFMEM_8MBIT    = 0b00101,
@@ -235,8 +236,6 @@ void dfmemWriteBuffer (unsigned char *data, unsigned int length,
     //Critical section MUST end immediately after this call, or DMA interrupt won't work!
     CRITICAL_SECTION_END
 
-    
-
 }
 
 void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
@@ -280,7 +279,7 @@ void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
     // 1 don't care bit + 13 page address bits + byte address bits
     MemAddr.address = (((unsigned long)page) << dfmem_geo.byte_address_bits) + byte;
 
-    CRITICAL_SECTION_START
+    CRITICAL_SECTION_START;
     // Read data from memory
     dfmemSelectChip();
 
@@ -295,13 +294,15 @@ void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
     dfmemWriteByte(0x00);
     readoutLocation = data;  //data will be written here by dfmem spi callback
     expectedReadbackSize = spic2MassTransmit(length, NULL, 2*length);
+    _exit_block = 1;
     //Critical section MUST end immediately after this call, or DMA int won't work!
-    CRITICAL_SECTION_END
+    CRITICAL_SECTION_END;
 
     //SPI callback will now read out SPI buffer to 'data'
     // and deselct chip select
-    dfmemSelectChip(); //Wait for DMA to complete
-    dfmemDeselectChip();
+    //dfmemSelectChip(); //Wait for DMA to complete  ////// MPU INTERRUPTING HERE
+    //dfmemDeselectChip();
+    while(_exit_block){};
 }
 
 void dfmemReadPage2Buffer (unsigned int page, unsigned char buffer)
@@ -525,6 +526,8 @@ void spiCallback(unsigned int irq_source) {
     }
 
     dfmemDeselectChip();
+
+    _exit_block = 0;
     /*if(irq_source == SPIC_TRANS_SUCCESS) {
 
         dfmemDeselectChip();
