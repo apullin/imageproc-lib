@@ -135,6 +135,9 @@ static unsigned int currentBuffer = 0;
 static unsigned int currentBufferOffset = 0;
 static unsigned int nextPage = 0;
 
+static unsigned char* readoutLocation = NULL;
+static unsigned int expectedReadbackSize = 0;
+
 enum FlashSizeType {
     DFMEM_8MBIT    = 0b00101,
     DFMEM_16MBIT   = 0b00110,
@@ -219,6 +222,7 @@ void dfmemWriteBuffer (unsigned char *data, unsigned int length,
     // 14 don't care bit + byte address bits
     MemAddr.address = (unsigned long)byte;
 
+    CRITICAL_SECTION_START
     // Write data to memory
     dfmemSelectChip();
 
@@ -226,14 +230,18 @@ void dfmemWriteBuffer (unsigned char *data, unsigned int length,
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
-
+    //Initiating the transfer can be inside critical section
     spic2MassTransmit(length, data, 2*length);
+    //Critical section MUST end immediately after this call, or DMA interrupt won't work!
+    CRITICAL_SECTION_END
+
+    
+
 }
 
 void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
 {
     unsigned char command;
-
     while(!dfmemIsReady());
 
     // Choose command dependent on buffer choice
@@ -247,6 +255,7 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
     // 1 don't care bit + 13 page address bits + don't care bits
     MemAddr.address = ((unsigned long)page) << dfmem_geo.byte_address_bits;
 
+    CRITICAL_SECTION_START
     // Write data to memory
     dfmemSelectChip();
 
@@ -254,7 +263,8 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
-
+    CRITICAL_SECTION_END
+            
     currentBufferOffset = 0;
 
     dfmemDeselectChip();
@@ -263,12 +273,14 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
 void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
         unsigned char *data)
 {
+    
     while(!dfmemIsReady());
 
     // Restructure page/byte addressing
     // 1 don't care bit + 13 page address bits + byte address bits
     MemAddr.address = (((unsigned long)page) << dfmem_geo.byte_address_bits) + byte;
 
+    CRITICAL_SECTION_START
     // Read data from memory
     dfmemSelectChip();
 
@@ -281,13 +293,14 @@ void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
     dfmemWriteByte(0x00);
     dfmemWriteByte(0x00);
     dfmemWriteByte(0x00);
+    readoutLocation = data;  //data will be written here by dfmem spi callback
+    expectedReadbackSize = spic2MassTransmit(length, NULL, 2*length);
+    //Critical section MUST end immediately after this call, or DMA int won't work!
+    CRITICAL_SECTION_END
 
-    unsigned int read_bytes;
-    read_bytes = spic2MassTransmit(length, NULL, 2*length);
-    dfmemSelectChip(); // Busy wait
-    spic2ReadBuffer(read_bytes, data);  // reads DMA buffer
-    //while (length--) { *data++ = dfmemReadByte(); }
-
+    //SPI callback will now read out SPI buffer to 'data'
+    // and deselct chip select
+    dfmemSelectChip(); //Wait for DMA to complete
     dfmemDeselectChip();
 }
 
@@ -356,6 +369,7 @@ void dfmemEraseBlock (unsigned int page)
 
 void dfmemEraseSector (unsigned int page)
 {
+    CRITICAL_SECTION_START
     while(!dfmemIsReady());
 
     // Restructure page/byte addressing
@@ -370,6 +384,7 @@ void dfmemEraseSector (unsigned int page)
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
     dfmemDeselectChip();
+    CRITICAL_SECTION_END
 }
 
 void dfmemEraseChip (void)
@@ -393,6 +408,7 @@ unsigned char dfmemIsReady (void)
 
 unsigned char dfmemGetStatus (void)
 {
+    CRITICAL_SECTION_START
     unsigned char byte;
 
     dfmemSelectChip();
@@ -401,7 +417,7 @@ unsigned char dfmemGetStatus (void)
     byte = dfmemReadByte();
 
     dfmemDeselectChip();
-
+    CRITICAL_SECTION_END
     return byte;
 }
 
@@ -472,6 +488,9 @@ void dfmemSave(unsigned char* data, unsigned int length)
 // write last buffer to memory
 void dfmemSync()
 {
+    dfmemSelectChip(); //Waits for transactions to finish
+    dfmemDeselectChip(); //Waits for transactions to finish
+
     //if currentBufferOffset == 0, then we don't need to write anything to be sync'd
     if(currentBufferOffset != 0){
         dfmemWriteBuffer2MemoryNoErase(nextPage, currentBuffer);
@@ -501,7 +520,12 @@ void dfmemZeroIndex()
 
 void spiCallback(unsigned int irq_source) {
 
-    if(irq_source == SPIC_TRANS_SUCCESS) {
+    if(readoutLocation != NULL){
+        spic2ReadBuffer(expectedReadbackSize, readoutLocation);
+    }
+
+    dfmemDeselectChip();
+    /*if(irq_source == SPIC_TRANS_SUCCESS) {
 
         dfmemDeselectChip();
 
@@ -510,6 +534,8 @@ void spiCallback(unsigned int irq_source) {
         spic2Reset();   // Reset hardware
 
     }
+     */
+    //TODO(rqou): don't ignore cause
 
 }
 
@@ -555,7 +581,9 @@ static void dfmemSetupPeripheral(void)
                       SLAVE_ENABLE_OFF &
                       CLK_POL_ACTIVE_HIGH &
                       MASTER_ENABLE_ON &
-                      PRI_PRESCAL_1_1 &
+                      //PRI_PRESCAL_64_1 &   //debug speed
+                      //SEC_PRESCAL_1_1);
+                      PRI_PRESCAL_1_1 &  //full speed
                       SEC_PRESCAL_4_1);
 }
 

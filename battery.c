@@ -93,7 +93,7 @@ static void batDefaultCallback(void) {
     LED_1 = 1;
     LED_2 = 1;
     #if defined(__IMAGEPROC2)
-        LED_3 = 1;
+        //LED_3 = 1;
     #endif
 
     // TODO (fgb) : Useful, but rarely used. Maybe move to another callback?
@@ -108,7 +108,7 @@ static void batDefaultCallback(void) {
         LED_1 = ~LED_1;
         LED_2 = ~LED_2;
         #if defined(__IMAGEPROC2)
-            LED_3 = ~LED_3;
+            //LED_3 = ~LED_3;
         #endif
         delay_ms(1000);
     }
