@@ -159,19 +159,22 @@ void spic2SetCallback(unsigned char cs, SpicIrqHandler handler) {
 int spic1BeginTransaction(unsigned char cs) {
     // TODO: Timeout?
 
+    
+
     // TODO: generalize?
     if (cs > 0)
       // Only one CS line is supported
       return -1;
 
     spi_port_ch1_lock(); // Wait for port to become available
+    CRITICAL_SECTION_START;
     // Reconfigure port
     SPI1STAT = 0;
     SPI1CON1 = spicon_ch1[cs];
     SPI1STAT = SPI_ENABLE & SPI_IDLE_CON & SPI_RX_OVFLOW_CLR;
     port_cs_line[0] = cs;
     SPI1_CS = SPI_CS_ACTIVE;    // Activate chip select
-
+    CRITICAL_SECTION_END;
     return 0;
 }
 
@@ -183,9 +186,10 @@ int spic2BeginTransaction(unsigned char cs) {
       // Two CS lines are supported
       return -1;
 
-
     spi_port_ch2_lock(); // Wait for port to become available
-    // Reconfigure port
+    
+    // Reconfigure port       ////// MPU INTERRUPTING HERE, over dfmemRead
+    CRITICAL_SECTION_START;
     SPI2STAT = 0;
     SPI2CON1 = spicon_ch2[cs];
     SPI2STAT = SPI_ENABLE & SPI_IDLE_CON & SPI_RX_OVFLOW_CLR;
@@ -194,26 +198,29 @@ int spic2BeginTransaction(unsigned char cs) {
       SPI2_CS1 = SPI_CS_ACTIVE;     // Activate chip select
     if (cs == 1)
       SPI2_CS2 = SPI_CS_ACTIVE;     // Activate chip select
+    CRITICAL_SECTION_END;
 
     return 0;
 }
 
 void spic1EndTransaction(void) {
 
+    CRITICAL_SECTION_START
     // Only one CS line
     SPI1_CS = SPI_CS_IDLE;  // Idle chip select after freeing since may cause irq
     spi_port_ch1_unlock();  // Free port
+    CRITICAL_SECTION_END
 
 }
 
 void spic2EndTransaction(void) {
-
+    CRITICAL_SECTION_START
     if (port_cs_line[1] == 0)
       SPI2_CS1 = SPI_CS_IDLE;  // Idle chip select
     if (port_cs_line[1] == 1)
       SPI2_CS2 = SPI_CS_IDLE;  // Idle chip select
     spi_port_ch2_unlock();     // Free port
-
+    CRITICAL_SECTION_END
 }
 
 void spic1Reset(void) {
