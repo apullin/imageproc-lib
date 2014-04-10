@@ -331,8 +331,6 @@ unsigned char radioSendData (unsigned int dest_addr, unsigned char status,
     MacPacket packet;
     Payload pld;
 
-    LED_GREEN = 1;
-
     packet = radioRequestPacket(datalen);
     if( packet == NULL ){
         if (fast_fail) {
@@ -360,8 +358,6 @@ unsigned char radioSendData (unsigned int dest_addr, unsigned char status,
     } else {
         while ( !radioEnqueueTxPacket(packet) ) radioProcess();
     }
-
-    LED_GREEN = 0;
 
     return EXIT_SUCCESS;
 }
