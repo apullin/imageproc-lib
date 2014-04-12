@@ -171,14 +171,26 @@ void radioSetSrcAddr(unsigned int src_addr) {
     trxSetAddress(src_addr);
 }
 
+unsigned int radioGetSrcAddr(){
+    return configuration.address.address;
+}
+
 void radioSetSrcPanID(unsigned int src_pan_id) {
     configuration.address.pan_id = src_pan_id;
     trxSetPan(src_pan_id);
 }
 
+unsigned int radioGetSrcPanID() {
+    return configuration.address.pan_id;
+}
+
 void radioSetChannel(unsigned char channel) {
     configuration.address.channel = channel;
     trxSetChannel(channel);
+}
+
+unsigned char radioGetChannel() {
+    return configuration.address.channel;
 }
 
 void radioSetSoftRetries(unsigned char retries) {

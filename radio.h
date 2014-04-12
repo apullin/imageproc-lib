@@ -98,8 +98,11 @@ void radioInit(unsigned int tx_queue_length, unsigned int rx_queue_length);
 void radioConfigure(RadioConfiguration *conf);
 void radioSetAddress(RadioAddress *address);
 void radioSetSrcAddr(unsigned int src_addr);
+unsigned int radioGetSrcAddr();
 void radioSetSrcPanID(unsigned int src_pan_id);
+unsigned int radioGetSrcPanID();
 void radioSetChannel(unsigned char channel);
+unsigned char radioGetChannel();
 void radioSetSoftRetries(unsigned char retries);
 void radioSetHardRetries(unsigned char retries);
 
