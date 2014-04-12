@@ -329,6 +329,18 @@ void trxSetStateOff(void) {
 
 }
 
+void trxSetPromMode(char on){
+    if (on){
+        trxWriteSubReg(SR_AACK_PROM_MODE, 1);
+        trxWriteSubReg(SR_AACK_DIS_ACK, 1);
+    }
+    else{
+        trxWriteSubReg(SR_AACK_PROM_MODE, 0);
+        trxWriteSubReg(SR_AACK_DIS_ACK, 0);
+    }
+}
+
+
 // =========== Private functions ==============================================
 
 /**

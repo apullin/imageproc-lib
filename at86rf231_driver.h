@@ -212,5 +212,12 @@ void trxSetStateIdle(void);
  */
 void trxSetStateOff(void);
 
+/**
+ * Sets transceiver promiscuous mode state.
+ *
+ * Argument of 1 sets transceiver to promiscuous mode, with auto-acks disabled.
+ * Argument of 0 puts transceiver back into regular mode (SRC, PAN filter, AACK)
+ */
+void trxSetPromMode(char on);
 
 #endif // __AT86RF231_DRIVER_H
