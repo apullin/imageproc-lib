@@ -105,7 +105,8 @@ void trxSetup(unsigned char cs)
 
     // SPI setup
     setupSPI();     // Set up SPI com port
-    spic1SetCallback(cs, &trxSpiCallback);  // Configure callback for spi interrupts
+    //spic1SetCallback(cs, &trxSpiCallback);  // Configure callback for spi interrupts
+    spic2SetCallback(cs, &trxSpiCallback);  // Configure callback for spi interrupts
     trxReadReg(RG_IRQ_STATUS);   // Clear pending interrupts
     trxSetStateOff(); // Transition to TRX_OFF for configuring device
     trxWriteSubReg(SR_IRQ_MASK, TRX_IRQ_TRX_END); // Interrupt at end of transceive
@@ -129,7 +130,8 @@ void trxReset(void) {
 
     unsigned int i;
 
-    spic1Reset();   // Reset comm
+    //spic1Reset();   // Reset comm
+    spic2Reset();   // Reset comm
     trxWriteSubReg(SR_TRX_CMD, CMD_TRX_OFF);  // Force to off state
 
     i = 0;
@@ -234,10 +236,12 @@ void trxWriteFrameBuffer(MacPacket packet) {
 
     memcpy(frame_buffer + i, payToString(pld), payGetPayloadLength(pld));
 
-    spic1BeginTransaction(TRX_CS);
-    spic1Transmit(TRX_CMD_FW);
-    spic1MassTransmit(phy_len, frame_buffer, phy_len*3); // 3*length microseconds timeout seems to work well
-
+    //spic1BeginTransaction(TRX_CS);
+    //spic1Transmit(TRX_CMD_FW);
+    //spic1MassTransmit(phy_len, frame_buffer, phy_len*3); // 3*length microseconds timeout seems to work well
+    spic2BeginTransaction(TRX_CS);
+    spic2Transmit(TRX_CMD_FW);
+    spic2MassTransmit(phy_len, frame_buffer, phy_len*3); // 3*length microseconds timeout seems to work well
 }
 
 unsigned int trxReadFrameBuffer(MacPacket packet) {
@@ -351,10 +355,15 @@ void trxSetPromMode(char on){
  */
 static void trxWriteReg(unsigned char addr, unsigned char val) {
 
-    spic1BeginTransaction(TRX_CS);
-    spic1Transmit(TRX_CMD_RW | addr);
-    spic1Transmit(val);
-    spic1EndTransaction();
+    //spic1BeginTransaction(TRX_CS);
+    //spic1Transmit(TRX_CMD_RW | addr);
+    //spic1Transmit(val);
+    //spic1EndTransaction();
+
+    spic2BeginTransaction(TRX_CS);
+    spic2Transmit(TRX_CMD_RW | addr);
+    spic2Transmit(val);
+    spic2EndTransaction();
 
 }
 
@@ -367,10 +376,14 @@ static void trxWriteReg(unsigned char addr, unsigned char val) {
 static unsigned char trxReadReg(unsigned char addr) {
 
     unsigned char c;
-    spic1BeginTransaction(TRX_CS);
-    spic1Transmit(TRX_CMD_RR | addr);
-    c = spic1Receive();
-    spic1EndTransaction();
+    //spic1BeginTransaction(TRX_CS);
+    //spic1Transmit(TRX_CMD_RR | addr);
+    //c = spic1Receive();
+    //spic1EndTransaction();
+    spic2BeginTransaction(TRX_CS);
+    spic2Transmit(TRX_CMD_RR | addr);
+    c = spic2Receive();
+    spic2EndTransaction();
     return c;
 
 }
@@ -471,7 +484,8 @@ static void trxSpiCallback(unsigned int interrupt_code) {
 
     if(interrupt_code == SPIC_TRANS_SUCCESS) {
 
-        spic1EndTransaction(); // End previous transaction
+        //spic1EndTransaction(); // End previous transaction
+        spic2EndTransaction(); // End previous transaction
 
         if(trx_state == RX_AACK_ON) {
             trxReadBuffer();
@@ -487,7 +501,8 @@ static void trxSpiCallback(unsigned int interrupt_code) {
     } else if(interrupt_code == SPIC_TRANS_TIMEOUT) {
 
         // This is indicative of some form of failure!
-        spic1Reset();
+        //spic1Reset();
+        spic2Reset();
         irqCallback(RADIO_HW_FAILURE);
 
     }
@@ -500,12 +515,14 @@ static void trxSpiCallback(unsigned int interrupt_code) {
  */
 static void trxFillBuffer(void) {
 
-    spic1BeginTransaction(TRX_CS);
-    last_rssi = spic1Transmit(TRX_CMD_FR);  // Begin write (returns RSSI because of SPI_CMD_MODE)
+    //spic1BeginTransaction(TRX_CS);
+    spic2BeginTransaction(TRX_CS);
+    //last_rssi = spic1Transmit(TRX_CMD_FR);  // Begin write (returns RSSI because of SPI_CMD_MODE)
+    last_rssi = spic2Transmit(TRX_CMD_FR);  // Begin write (returns RSSI because of SPI_CMD_MODE)
     //current_phy_len = spic1Receive(); // Read physical frame size
     //spic1MassTransmit(current_phy_len, NULL, current_phy_len*3); // DMA rest into buffer
-    spic1MassTransmit(FRAME_BUFFER_SIZE, NULL, FRAME_BUFFER_SIZE*3); // DMA entire frame buffer into memory
-
+    //spic1MassTransmit(FRAME_BUFFER_SIZE, NULL, FRAME_BUFFER_SIZE*3); // DMA entire frame buffer into memory
+    spic2MassTransmit(FRAME_BUFFER_SIZE, NULL, FRAME_BUFFER_SIZE*3); // DMA entire frame buffer into memory
 }
 
 /**
@@ -513,13 +530,14 @@ static void trxFillBuffer(void) {
  */
 static void trxReadBuffer(void) {
 
-    spic1ReadBuffer(FRAME_BUFFER_SIZE, frame_buffer);
-
+    //spic1ReadBuffer(FRAME_BUFFER_SIZE, frame_buffer);
+    spic2ReadBuffer(FRAME_BUFFER_SIZE, frame_buffer);
 }
 
 static void setupSPI(void)
 {
-    spicSetupChannel1(TRX_CS,
+    //spicSetupChannel1(TRX_CS,
+    spicSetupChannel2(TRX_CS,
                       ENABLE_SCK_PIN &
                       ENABLE_SDO_PIN &
                       SPI_MODE16_OFF &
@@ -530,6 +548,8 @@ static void setupSPI(void)
                       MASTER_ENABLE_ON &
                       PRI_PRESCAL_1_1 &
                       SEC_PRESCAL_6_1);
+                      //PRI_PRESCAL_64_1 &
+                      //SEC_PRESCAL_1_1);
 }
 
 static inline void trxSetSlptr(unsigned char val) {

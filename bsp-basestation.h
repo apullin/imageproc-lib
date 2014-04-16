@@ -17,7 +17,7 @@
 #define SLPTR           _LATE5 // Radio Sleep/Transmit Pin
 
 //TRX defines
-#define TRX_CS      0 //On SPI channel 1
+#define TRX_CS      0 //TRX on SPI channel 2 on basestation
 //DFMEM defines
 //#define DFMEM_CS    0 //On SPI channel 2
 //MPU defines
@@ -25,8 +25,8 @@
 
 //These should probably be in a chip support package include, rather than BSP
 #define SPI1_CS             (_LATG9)    // Radio Chip Select
-#define SPI2_CS1            (_LATB2)    // Flash Chip Select
-#define SPI2_CS2            (_LATC15)   // MPU6000 Chip Select
+#define SPI2_CS1            (_LATG9)    // Flash Chip Select
+#define SPI2_CS2            (_LATG9)   // MPU6000 Chip Select
 
 // UART
 #define UART_RX_IF _U1RXIF
