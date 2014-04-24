@@ -192,8 +192,8 @@ void SetupPorts(void)
     TRISE = 0x0000;
 
     // RADIO: SPI2 Slave Select is an output (RG9)
-    LATG  = 0b0000000000;
-    TRISG = 0b0111111111;
+    LATG  = 0b1000000000;
+    TRISG = 0b0000111111;
 
 #elif defined(__MIKRO)
 
