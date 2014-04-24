@@ -156,6 +156,10 @@ void radioGetStatus(RadioStatus *stat) {
     memcpy(stat, &status, sizeof(RadioStatus));
 }
 
+unsigned char radioGetLastRSSI(){
+    return status.last_rssi;
+}
+
 void radioSetAddress(RadioAddress *address) {
 
     if(address == NULL) { return; }
