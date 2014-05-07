@@ -23,6 +23,8 @@
 //MPU defines
 //#define MPU_CS      1 //On SPI channel 2
 
+#define TRX_SPI_CHAN 1
+
 //These should probably be in a chip support package include, rather than BSP
 #define SPI1_CS             (_LATG9)    // Radio Chip Select
 #define SPI2_CS1            (_LATG9)    // Flash Chip Select
