@@ -42,6 +42,8 @@
  *
  */
 
+#include "FreeRTOS.h"
+
  #include "mac_packet.h"
  #include "payload.h"
  #include <stdlib.h>
@@ -57,7 +59,9 @@
 
  MacPacket macCreateEmpty(void) {
 
-    MacPacket packet = (MacPacket)malloc(sizeof(MacPacketStruct));
+//    MacPacket packet = (MacPacket)malloc(sizeof(MacPacketStruct));
+
+    MacPacket packet = (MacPacket)pvPortMalloc(sizeof(MacPacketStruct));
     if(packet == NULL) {
         return NULL;
     }

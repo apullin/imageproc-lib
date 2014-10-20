@@ -37,6 +37,8 @@
  *  Stanley S. Baek     2010-06-05    Initial release
  */
 
+#include "FreeRTOS.h"
+
 #include "payload.h"
 #include "utils.h"
 #include <stdlib.h>     // for malloc
@@ -56,19 +58,18 @@ Payload payCreate(unsigned char data_length, unsigned char *data,
     return pld;
 }
 
+Payload payCreateEmpty(unsigned char data_length) {
+//  Payload pld = (Payload) malloc(sizeof (PayloadStruct));
+    Payload pld = (Payload) pvPortMalloc(sizeof (PayloadStruct));
 
-Payload payCreateEmpty(unsigned char data_length)
-{
-    Payload pld = (Payload)malloc(sizeof(PayloadStruct));
+    if (pld == NULL) return NULL;
 
-    if ( pld == NULL ) return NULL;
+    //    unsigned char* data = (unsigned char*)malloc(data_length + PAYLOAD_HEADER_LENGTH);
+    unsigned char* data = (unsigned char*) pvPortMalloc(data_length + PAYLOAD_HEADER_LENGTH);
 
-    unsigned char* data = (unsigned char*)malloc(data_length + PAYLOAD_HEADER_LENGTH);
-
-    if ( data == NULL )
-    {
-      free(pld);
-      return NULL;
+    if (data == NULL) {
+        free(pld);
+        return NULL;
     }
 
     pld->pld_data = data;

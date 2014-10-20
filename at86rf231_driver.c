@@ -267,10 +267,10 @@ void trxBeginTransmission(void) {
 
 void trxSetStateTx(void) {
 
-    CRITICAL_SECTION_START;
+    //CRITICAL_SECTION_START;
 
     if(trx_state == TX_ARET_ON) { // Fast return if already in desired state
-        CRITICAL_SECTION_END;
+//        CRITICAL_SECTION_END;
         return;
     }
 
@@ -278,16 +278,16 @@ void trxSetStateTx(void) {
     while(trxReadSubReg(SR_TRX_STATUS) != TX_ARET_ON);  // Wait for completion
     trx_state = TX_ARET_ON; // Update state
 
-    CRITICAL_SECTION_END;
+    //CRITICAL_SECTION_END;
 
 }
 
 void trxSetStateRx(void) {
 
-    CRITICAL_SECTION_START;
+    //CRITICAL_SECTION_START;
 
     if(trx_state == RX_AACK_ON) {  // Fast return
-        CRITICAL_SECTION_END;
+        //CRITICAL_SECTION_END;
         return;
     }
 
@@ -295,16 +295,16 @@ void trxSetStateRx(void) {
     while(trxReadSubReg(SR_TRX_STATUS) != RX_AACK_ON);  // Wait for completion
     trx_state = RX_AACK_ON; // Update state
 
-    CRITICAL_SECTION_END;
+    //CRITICAL_SECTION_END;
 
 }
 
 void trxSetStateIdle(void) {
 
-    CRITICAL_SECTION_START;
+    //CRITICAL_SECTION_START;
 
     if(trx_state == PLL_ON) {  // Fast return
-        CRITICAL_SECTION_END;
+        //CRITICAL_SECTION_END;
         return;
     }
 
@@ -312,16 +312,16 @@ void trxSetStateIdle(void) {
     while(trxReadSubReg(SR_TRX_STATUS) != PLL_ON);  // Wait for completion
     trx_state = PLL_ON; // Update state
 
-    CRITICAL_SECTION_END;
+    //CRITICAL_SECTION_END;
 
 }
 
 void trxSetStateOff(void) {
 
-    CRITICAL_SECTION_START;
+    //CRITICAL_SECTION_START;
 
     if(trx_state == TRX_OFF) {     // Fast return
-        CRITICAL_SECTION_END;
+        //CRITICAL_SECTION_END;
         return;
     }
 
@@ -329,7 +329,7 @@ void trxSetStateOff(void) {
     while(trxReadSubReg(SR_TRX_STATUS) != TRX_OFF); // Wait for completion
     trx_state = TRX_OFF;    // Update state
 
-    CRITICAL_SECTION_END;
+    //CRITICAL_SECTION_END;
 
 }
 
