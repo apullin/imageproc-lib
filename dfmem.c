@@ -60,7 +60,7 @@
 #include <xc.h>
 #include "spi.h"
 #include "dfmem.h"
-#include "spi_controller.h"        // For DMA
+#include "spi_controller-freertos.h"        // For DMA
 #include "utils.h"
 
 // Flash geometry
@@ -223,7 +223,7 @@ void dfmemWriteBuffer (unsigned char *data, unsigned int length,
     // 14 don't care bit + byte address bits
     MemAddr.address = (unsigned long)byte;
 
-    CRITICAL_SECTION_START
+//    CRITICAL_SECTION_START
     // Write data to memory
     dfmemSelectChip();
 
@@ -234,7 +234,7 @@ void dfmemWriteBuffer (unsigned char *data, unsigned int length,
     //Initiating the transfer can be inside critical section
     spic2MassTransmit(length, data, 2*length);
     //Critical section MUST end immediately after this call, or DMA interrupt won't work!
-    CRITICAL_SECTION_END
+//    CRITICAL_SECTION_END
 
 }
 
@@ -254,7 +254,7 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
     // 1 don't care bit + 13 page address bits + don't care bits
     MemAddr.address = ((unsigned long)page) << dfmem_geo.byte_address_bits;
 
-    CRITICAL_SECTION_START
+//    CRITICAL_SECTION_START
     // Write data to memory
     dfmemSelectChip();
 
@@ -262,14 +262,14 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
-    CRITICAL_SECTION_END
+//    CRITICAL_SECTION_END
             
     currentBufferOffset = 0;
 
     dfmemDeselectChip();
 }
 
-void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
+void dfmemRead(unsigned int page, unsigned int byte, unsigned int length,
         unsigned char *data)
 {
     
@@ -279,7 +279,7 @@ void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
     // 1 don't care bit + 13 page address bits + byte address bits
     MemAddr.address = (((unsigned long)page) << dfmem_geo.byte_address_bits) + byte;
 
-    CRITICAL_SECTION_START;
+//    CRITICAL_SECTION_START;
     // Read data from memory
     dfmemSelectChip();
 
@@ -294,15 +294,15 @@ void dfmemRead (unsigned int page, unsigned int byte, unsigned int length,
     dfmemWriteByte(0x00);
     readoutLocation = data;  //data will be written here by dfmem spi callback
     expectedReadbackSize = spic2MassTransmit(length, NULL, 2*length);
-    _exit_block = 1;
+//    _exit_block = 1;
     //Critical section MUST end immediately after this call, or DMA int won't work!
-    CRITICAL_SECTION_END;
+//    CRITICAL_SECTION_END;
 
     //SPI callback will now read out SPI buffer to 'data'
     // and deselct chip select
     //dfmemSelectChip(); //Wait for DMA to complete  ////// MPU INTERRUPTING HERE
-    //dfmemDeselectChip();
-    while(_exit_block){};
+    dfmemDeselectChip();
+//    while(_exit_block){};
 }
 
 void dfmemReadPage2Buffer (unsigned int page, unsigned char buffer)
@@ -370,7 +370,7 @@ void dfmemEraseBlock (unsigned int page)
 
 void dfmemEraseSector (unsigned int page)
 {
-    CRITICAL_SECTION_START
+//    CRITICAL_SECTION_START
     while(!dfmemIsReady());
 
     // Restructure page/byte addressing
@@ -385,7 +385,7 @@ void dfmemEraseSector (unsigned int page)
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
     dfmemDeselectChip();
-    CRITICAL_SECTION_END
+//    CRITICAL_SECTION_END
 }
 
 void dfmemEraseChip (void)
@@ -409,7 +409,7 @@ unsigned char dfmemIsReady (void)
 
 unsigned char dfmemGetStatus (void)
 {
-    CRITICAL_SECTION_START
+//    CRITICAL_SECTION_START
     unsigned char byte;
 
     dfmemSelectChip();
@@ -418,7 +418,7 @@ unsigned char dfmemGetStatus (void)
     byte = dfmemReadByte();
 
     dfmemDeselectChip();
-    CRITICAL_SECTION_END
+//    CRITICAL_SECTION_END
     return byte;
 }
 

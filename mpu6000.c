@@ -46,7 +46,7 @@
 #include "mpu6000.h"
 #include "ports.h"
 #include "spi.h"
-#include "spi_controller.h"
+#include "spi_controller-freertos.h"
 #include "utils.h"
 #include <string.h>
 
