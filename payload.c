@@ -68,7 +68,8 @@ Payload payCreateEmpty(unsigned char data_length) {
     unsigned char* data = (unsigned char*) pvPortMalloc(data_length + PAYLOAD_HEADER_LENGTH);
 
     if (data == NULL) {
-        free(pld);
+//        free(pld);
+        vPortFree(pld);
         return NULL;
     }
 
