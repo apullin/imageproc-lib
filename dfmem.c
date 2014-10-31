@@ -58,9 +58,9 @@
 #include <string.h>
 
 #include <xc.h>
+#include "spi_controller-freertos.h"        
 #include "spi.h"
 #include "dfmem.h"
-#include "spi_controller-freertos.h"        // For DMA
 #include "utils.h"
 
 // Flash geometry
@@ -301,7 +301,7 @@ void dfmemRead(unsigned int page, unsigned int byte, unsigned int length,
     //SPI callback will now read out SPI buffer to 'data'
     // and deselct chip select
     //dfmemSelectChip(); //Wait for DMA to complete  ////// MPU INTERRUPTING HERE
-    dfmemDeselectChip();
+//    dfmemDeselectChip();
 //    while(_exit_block){};
 }
 
@@ -471,16 +471,11 @@ void dfmemResumeFromDeepSleep()
     dfmemDeselectChip();
 }
 
-void dfmemSave(unsigned char* data, unsigned int length)
-{   //If this write will not fit into the buffer, then
-       if (currentBufferOffset + length > dfmem_geo.buffer_size)
-       { dfmemSync(); //  i) write current buffer to memory, and  ii) switch to new buffer
-       }
- /*       dfmemWriteBuffer2MemoryNoErase(nextPage, currentBuffer);
-        currentBuffer = (currentBuffer) ? 0 : 1; // toggle buffer
-        currentBufferOffset = 0;  // reset to beginning
-        nextPage++;
-*/
+void dfmemSave(unsigned char* data, unsigned int length) { //If this write will not fit into the buffer, then
+    if (currentBufferOffset + length > dfmem_geo.buffer_size) {
+        dfmemSync(); //  i) write current buffer to memory, and  ii) switch to new buffer
+    }
+
     //  write data into buffer
     dfmemWriteBuffer(data, length, currentBufferOffset, currentBuffer);
     currentBufferOffset += length;
@@ -489,9 +484,6 @@ void dfmemSave(unsigned char* data, unsigned int length)
 // write last buffer to memory
 void dfmemSync()
 {
-    dfmemSelectChip(); //Waits for transactions to finish
-    dfmemDeselectChip(); //Waits for transactions to finish
-
     //if currentBufferOffset == 0, then we don't need to write anything to be sync'd
     if(currentBufferOffset != 0){
         dfmemWriteBuffer2MemoryNoErase(nextPage, currentBuffer);
@@ -527,7 +519,6 @@ void spiCallback(unsigned int irq_source) {
 
     dfmemDeselectChip();
 
-    _exit_block = 0;
     /*if(irq_source == SPIC_TRANS_SUCCESS) {
 
         dfmemDeselectChip();

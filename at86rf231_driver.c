@@ -50,7 +50,7 @@
 #include "ports.h"
 #include "mac_packet.h"
 #include "payload.h"
-#include "spi.h"                // SFRs
+#include "spi.h"                        // SFRs
 #include "radio_freertos.h"              // Need radio status codes
 
 
