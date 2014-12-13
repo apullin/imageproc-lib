@@ -40,11 +40,16 @@
  *
  */
 
-#include "queue.h"
-#include "utils.h"
+// XC compiler include
 #include <xc.h>
+
+// Library includes
 #include <stdio.h>      // for NULL
 #include <stdlib.h>     // for malloc
+
+// imageproc-lib includes
+#include "utils.h"
+#include "queue.h"
 
 
 #ifndef CRITICAL_SECTION_START

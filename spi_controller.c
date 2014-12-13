@@ -41,28 +41,20 @@
  *    This is a problem if a higher-level timeout fires before the spic timeout
  */
 
-#include "spi_controller.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "atomic.h"
 #include "spi.h"
 #include "timer.h"
 #include "dma.h"
-#include "init_default.h"
-#include "utils.h"
-
 #include <string.h>
 
-/*
- This is now done in bsp-ip*.h
-// This section is board-specific
-// TODO: Generalize or move to BSP header
-#if defined(__IMAGEPROC2)
+// imageproc-lib includes
+#include "utils.h"
+#include "spi_controller.h"
 
-    #define SPI1_CS             (_LATB2)    // Radio Chip Select
-    #define SPI2_CS1            (_LATG9)    // Flash Chip Select
-    #define SPI2_CS2            (_LATC15)   // MPU6000 Chip Select
-
-#endif
-*/
 
 // DMA channels allocated as per Wiki assignments
 #define SPIC1_DMAR_CONbits      (DMA2CONbits)

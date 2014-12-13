@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, Regents of the University of California
+ * Copyright (c) 2014, Regents of the University of California
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,16 @@
  *    encoder chips
  */
 
-#include "i2c_driver.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "i2c.h"
-#include "ams-enc.h"
+
+// imageproc-lib includes
 #include "utils.h"
+#include "i2c_driver.h"
+#include "ams-enc.h"
 
 
 #define LSB2ENCDEG      0.0219
@@ -120,6 +126,12 @@ void amsEncoderSetup(void) {
     amsEncoderResetPos();
 }
 
+/*****************************************************************************
+ * Function Name : encGetPos
+ * Description   : Read the angular position of the encoder[num], write to struct encPos
+ * Parameters    : None
+ * Return Value  : None
+ *****************************************************************************/
 void amsEncoderResetPos(void) {
     // initialize structure
     int i;

@@ -42,8 +42,16 @@
  *  - This module requires Timer 8 and 9 for setting up a 32-bit timer.
  */
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "timer.h"
+
+// imageproc-lib includes
+#include "utils.h"
 #include "sclock.h"
+
 
 #define TMR_MSW     (TMR9HLD)
 #define TMR_LSW     (TMR8)

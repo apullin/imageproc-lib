@@ -43,10 +43,18 @@
  *
  */
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
+#include <stdlib.h>
+
+// imageproc-lib includes
+#include "utils.h"
 #include "ppool.h"
 #include "mac_packet.h"
 #include "carray.h"
-#include <stdlib.h>
+
 
 // ================ CONSTANTS =================================================
 

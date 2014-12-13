@@ -39,20 +39,24 @@
  *  Humphrey Hu     2012-7-18   Consolidated state into data structures
  */
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
+#include <stdlib.h>
+#include <string.h>
+
+// imageproc-lib includes
 #include "utils.h"
 #include "init_default.h"
+#include "sclock.h"
 #include "radio.h"
 #include "carray.h"
 #include "mac_packet.h"
-#include "sclock.h"
-#include "timer.h"
 #include "ppool.h"
-
 #include "at86rf231.h"  // Current transceiver IC
 #include "at86rf231_driver.h"
 
-#include <stdlib.h>
-#include <string.h>
 
 #define RADIO_DEFAULT_SRC_ADDR          (0x1101)
 #define RADIO_DEFAULT_SRC_PAN           (0x1001)

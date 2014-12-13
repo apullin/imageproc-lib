@@ -44,11 +44,15 @@
  *  - Values are stored locally, getter functions are provided.
  */
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "adc.h"
-#include "adc_pid.h"
-#include "p33Fxxxx.h"
-#include "ports.h"
+
+// imageproc-lib includes
 #include "utils.h"
+#include "adc_pid.h"
 
 
 //Functions

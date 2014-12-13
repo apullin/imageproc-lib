@@ -44,9 +44,15 @@
  *      items[head] == items[tail] == NULL when the queue is empty
  */
 
-#include "carray.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include <stdlib.h>
+
+// imageproc-lib includes
 #include "utils.h"
+#include "carray.h"
 
 // ================ Function Stubs ============================================
 static inline unsigned int carrayNextIndex(CircArray carray, unsigned int i);

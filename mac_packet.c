@@ -42,10 +42,17 @@
  *
  */
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
+#include <stdlib.h>
+#include <string.h>
+
+// imageproc-lib includes
  #include "mac_packet.h"
  #include "payload.h"
- #include <stdlib.h>
-#include <string.h>
+
 
  #define MAC_PHY_LEN_POS            (0)
  #define MAC_FCF_LB_POS             (1)

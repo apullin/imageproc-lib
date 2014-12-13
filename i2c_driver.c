@@ -41,11 +41,15 @@
  *  - TODO (apullin): Module configuration might get centralized.
  */
 
-#include "i2c_driver.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "i2c.h"
-#include "generic_typedefs.h"
+
+// imageproc-lib includes
 #include "utils.h"
-#include <stdio.h>
+#include "i2c_driver.h"
 
 
 //////////////   Private declarations  ////////////////

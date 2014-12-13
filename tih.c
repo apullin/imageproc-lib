@@ -5,10 +5,17 @@
  * Author: apullin
  *********************************************/
 
-#include "tih.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "pwm.h"
-#include "ports.h"
+
+// imageproc-lib includes
+#include "utils.h"
+#include "tih.h"
 #include "init_default.h"
+
 
 #define NUM_PWM 4
 #define OUTPUT_PWM  1

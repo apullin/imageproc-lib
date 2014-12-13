@@ -39,7 +39,10 @@
  *
  */
 
+// XC compiler include
 #include <xc.h>
+
+// Library includes
 #include "adc.h"
 
 /* Configuration Bits (macros defined in processor header) */

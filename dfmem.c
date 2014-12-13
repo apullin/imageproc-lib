@@ -54,14 +54,19 @@
  //                DFMEM-specific driver to match radio class/driver
  // TODO (humhu) : Add a rudimentary filesystem
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
+#include "spi.h"
 #include <stdlib.h>
 #include <string.h>
 
-#include <xc.h>
-#include "spi.h"
+// imageproc-lib includes
+#include "utils.h"
 #include "dfmem.h"
 #include "spi_controller.h"        // For DMA
-#include "utils.h"
+
 
 // Flash geometry
 // 8 Mbit

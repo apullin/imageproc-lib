@@ -37,11 +37,18 @@
  *  Stanley S. Baek     2010-06-05    Initial release
  */
 
-#include "payload.h"
-#include "utils.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include <stdlib.h>     // for malloc
 #include <stdarg.h>     // variable number of arguments
 #include <string.h>     // for memcpy
+
+// imageproc-lib includes
+#include "utils.h"
+#include "payload.h"
+
 
 #define STATUS_POS              0
 #define TYPE_POS                1

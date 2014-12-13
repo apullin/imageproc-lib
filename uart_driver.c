@@ -1,9 +1,17 @@
-#include "uart_driver.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "uart.h"
+
+// imageproc-lib includes
+#include "utils.h"
+#include "uart_driver.h"
 #include "mac_packet.h"
 #include "payload.h"
 #include "ppool.h"
 #include "utils.h"
+
 
 static MacPacket tx_packet = NULL;
 static Payload tx_payload = NULL;

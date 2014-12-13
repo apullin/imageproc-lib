@@ -41,17 +41,26 @@
  *    No-Clock (sleep) RX listening mode not yet implemented
  */
 
+// XC compiler include
+#include <xc.h>
+
+// Library includes
+#include "spi.h"                // SFRs
+#include "ports.h"
+#include <string.h>
+
+// imageproc-lib includes
+#include "utils.h"
+#include "adc_pid.h"
 #include "at86rf231.h"
 #include "at86rf231_driver.h"
-#include "ports.h"
 #include "mac_packet.h"
 #include "payload.h"
-#include "spi.h"                // SFRs
 #include "radio.h"              // Need radio status codes
 #include "spi_controller.h"
-#include "utils.h"
 
-#include <string.h>
+
+//#include <string.h>
 
 // Basic commands
 #define TRX_CMD_RW          (0xC0) // Register Write

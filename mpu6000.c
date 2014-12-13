@@ -43,12 +43,18 @@
  * - This module uses an SPI port for communicating with the chip
  */
 
-#include "mpu6000.h"
-#include "ports.h"
+// XC compiler include
+#include <xc.h>
+
+// Library includes
 #include "spi.h"
-#include "spi_controller.h"
-#include "utils.h"
 #include <string.h>
+
+// imageproc-lib includes
+#include "utils.h"
+#include "mpu6000.h"
+#include "spi_controller.h"
+
 
 // Read/Write Access
 #define READ (128)
