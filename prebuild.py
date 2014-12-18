@@ -6,7 +6,7 @@ Write version and date information to a .c file, so compiles can be updated
 authors: ronf, fgb, apullin
 """
 
-import time, os, sys
+import time, os, sys, re
 
 VER_STR_LENGTH_MAX = 80
 
@@ -25,7 +25,7 @@ for line in infile:
         infile.close()
         break
 
-identStr = eval( (identStrLine.split())[2] )
+identStr = re.findall(r'"(.*?)"', line)[0]
 timestamp = time.strftime("%a %b %d %H:%M:%S %Y")
 verStr    = identStr + " " + timestamp
 verStrClip = verStr[0:VER_STR_LENGTH_MAX]
