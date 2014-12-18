@@ -79,8 +79,7 @@ EncObj encPos[NUM_ENC];
 
 #define AMS_ENC_ANGLE_REG   0xFE
 
-#define AMS_ENC_OFFSET_0 5758
-#define AMS_ENC_OFFSET_1 7706
+
 
 volatile unsigned char  state = AMS_ENC_IDLE;
 volatile unsigned char  encoder_number = 0;
@@ -141,8 +140,33 @@ void amsEncoderResetPos(void) {
         encPos[i].calibPos = 0;
         encPos[i].oticks = 0;   // set revolution counter to 0
     }
+
+    //Set up offset
+    //TODO: maybe move these to NVM somewhere in the flash, rather than project defines
+#ifdef AMS_ENC_OFFSET_0
     encPos[0].offset = AMS_ENC_OFFSET_0;
+#else
+    encPos[0].offset = 0;
+#endif
+
+#ifdef AMS_ENC_OFFSET_1
     encPos[1].offset = AMS_ENC_OFFSET_1;
+#else
+    encPos[1].offset = 0;
+#endif
+
+#ifdef AMS_ENC_OFFSET_2
+    encPos[2].offset = AMS_ENC_OFFSET_2;
+#else
+    encPos[2].offset = 0;
+#endif
+
+#ifdef AMS_ENC_OFFSET_3
+    encPos[3].offset = AMS_ENC_OFFSET_3;
+#else
+    encPos[3].offset = 0;
+#endif
+
 }
 
 /*****************************************************************************
@@ -282,4 +306,31 @@ float amsEncoderGetFloatPos(unsigned char num) {
     float pos;
     pos = encPos[num].pos* LSB2ENCDEG; //calculate Float
     return pos;
+}
+
+int amsEncoderGetPos(unsigned char num) {
+    if(num < NUM_ENC){
+        return encPos[num].pos;
+    }
+    else{
+        return 0;
+    }
+}
+
+long amsEncoderGetOticks(unsigned char num) {
+    if(num < NUM_ENC){
+        return encPos[num].oticks;
+    }
+    else{
+        return 0;
+    }
+}
+
+unsigned int amsEncoderGetOffset(unsigned char num){
+    if(num < NUM_ENC){
+        return encPos[num].offset;
+    }
+    else{
+        return 0;
+    }
 }
