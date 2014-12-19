@@ -117,7 +117,7 @@ float amsEncoderGetFloatPos(unsigned char num);
  * Parameters    : None
  * Return Value  : int value for a single encoder
  *****************************************************************************/
-int amsEncoderGetPos(unsigned char num);
+unsigned int amsEncoderGetPos(unsigned char num);
 
 /*****************************************************************************
  * Function Name : amsEncoderGetOticks

@@ -308,7 +308,7 @@ float amsEncoderGetFloatPos(unsigned char num) {
     return pos;
 }
 
-int amsEncoderGetPos(unsigned char num) {
+unsigned int amsEncoderGetPos(unsigned char num) {
     if(num < NUM_ENC){
         return encPos[num].pos;
     }
