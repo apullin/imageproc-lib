@@ -41,6 +41,9 @@
 
 #define FCY (40000000) // Internal instruction cycle clock
 
+//For iplib, to be removed in future.
+#define _IMAGEPROC_LIB_FREERTOS
+
 // Sets up the MCU to use external clock.
 //
 // Settings: 40MHz
