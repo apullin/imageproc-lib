@@ -137,7 +137,6 @@ static unsigned int nextPage = 0;
 
 static unsigned char* readoutLocation = NULL;
 static unsigned int expectedReadbackSize = 0;
-static char _exit_block = 0;
 
 enum FlashSizeType {
     DFMEM_8MBIT    = 0b00101,
