@@ -99,7 +99,7 @@ static TrxIrqHandler irqCallback;
 static tal_trx_status_t trx_state;
 static unsigned char frame_buffer[FRAME_BUFFER_SIZE];
 static unsigned char last_rssi;
-static unsigned char last_ackd = 0;
+//static unsigned char last_ackd = 0;
 
 
 // =========== Public functions ===============================================
@@ -206,11 +206,11 @@ unsigned char trxReadED(void) {
 
 }
 
-unsigned char trxGetLastACKd(void) {
+//unsigned char trxGetLastACKd(void) {
 
-    return last_ackd;
+//    return last_ackd;
 
-}
+//}
 
 void trxWriteFrameBuffer(MacPacket packet) {
 
@@ -261,7 +261,7 @@ void trxBeginTransmission(void) {
     trxSetSlptr(1);
     trxSetSlptr(0);
     trx_state = BUSY_TX_ARET;   // Update state accordingly
-    last_ackd = 0;
+    //last_ackd = 0;
 }
 
 void trxSetStateTx(void) {
@@ -422,6 +422,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT4Interrupt(void) {
     irq_cause = 0;
     status = 0xFF;
 
+    _INT4IF = 0;                                // Clear interrupt flag
+
     irq_cause = trxReadReg(RG_IRQ_STATUS);    // Read and clear irq source
 
     if(irq_cause & TRX_IRQ_TRX_END) {
@@ -434,14 +436,14 @@ void __attribute__((interrupt, no_auto_psv)) _INT4Interrupt(void) {
             trx_state = TX_ARET_ON; // State transition
 
             if(status == TRAC_SUCCESS) {
-                last_ackd = 1;
+                //last_ackd = 1;
                 irqCallback(RADIO_TX_SUCCESS);
             } else if(status == TRAC_SUCCESS_DATA_PENDING) {
                 irqCallback(RADIO_TX_SUCCESS);
             } else if(status == TRAC_CHANNEL_ACCESS_FAILURE) {
                 irqCallback(RADIO_TX_FAILURE);
             } else if(status == TRAC_NO_ACK) {
-                last_ackd = 0;
+                //last_ackd = 0;
                 irqCallback(RADIO_TX_FAILURE);
             } else if(status == TRAC_INVALID) {
                 irqCallback(RADIO_TX_FAILURE);
@@ -466,7 +468,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT4Interrupt(void) {
         }
     }
 
-    _INT4IF = 0;                                // Clear interrupt flag
+    
 
 }
 

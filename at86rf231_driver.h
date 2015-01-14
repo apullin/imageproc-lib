@@ -139,7 +139,7 @@ unsigned char trxReadED(void);
  *
  * @return 1 for transmission success, 0 for failure.
  */
-unsigned char trxGetLastACKd(void);
+//unsigned char trxGetLastACKd(void);
 
 /**
  * Write the contents of a packet to the transceiver.
