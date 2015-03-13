@@ -1,6 +1,7 @@
 #include "robot_config.h"
 #include "dfmem.h"
 #include "string.h"
+#include "stdlib.h"
 
 robotConfig currentConfig;
 

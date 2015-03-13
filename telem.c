@@ -143,8 +143,7 @@ void telemSetup() {
     //Telemetry packet size is set at startupt time.
     telemDataSize = sizeof (TELEM_TYPE);
     telemPacketSize = sizeof (telemStruct_t);
-    Nop();
-    Nop();
+
 
     //Install telemetry service handler
     // Lines removed before to use telemetry module in direct mode, does not 

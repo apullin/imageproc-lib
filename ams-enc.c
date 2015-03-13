@@ -50,6 +50,8 @@
 #include "ams-enc.h"
 #include "utils.h"
 #include "settings.h"
+#include "stdlib.h"
+#include "robot_config.h"
 
 #define LSB2ENCDEG      0.0219
 #define ENC_I2C_CHAN    1       //Encoder is on I2C channel 1
@@ -73,7 +75,7 @@ EncObj encPos[NUM_ENC];
 
 #define AMS_ENC_ANGLE_REG   0xFE
 
-
+robotConfig config2;
 
 volatile unsigned char  state = AMS_ENC_IDLE;
 volatile unsigned char  encoder_number = 0;
@@ -113,6 +115,8 @@ void amsEncoderSetup(void) {
     encoder_new_pos = 0;
     state = AMS_ENC_IDLE;
 
+    config2 = malloc(sizeof(robotConfigStruct_t));
+
     //setup I2C port I2C1
     encoderSetupPeripheral();
 
@@ -130,30 +134,10 @@ void amsEncoderResetPos(void) {
     }
 
     //Set up offset
-    //TODO: maybe move these to NVM somewhere in the flash, rather than project defines
-#ifdef AMS_ENC_OFFSET_0
-    encPos[0].offset = AMS_ENC_OFFSET_0;
-#else
-    encPos[0].offset = 0;
-#endif
-
-#ifdef AMS_ENC_OFFSET_1
-    encPos[1].offset = AMS_ENC_OFFSET_1;
-#else
-    encPos[1].offset = 0;
-#endif
-
-#ifdef AMS_ENC_OFFSET_2
-    encPos[2].offset = AMS_ENC_OFFSET_2;
-#else
-    encPos[2].offset = 0;
-#endif
-
-#ifdef AMS_ENC_OFFSET_3
-    encPos[3].offset = AMS_ENC_OFFSET_3;
-#else
-    encPos[3].offset = 0;
-#endif
+    encPos[0].offset = config2->ams_enc_offset_0;
+    encPos[1].offset = config2->ams_enc_offset_1;
+    encPos[2].offset = config2->ams_enc_offset_2;
+    encPos[3].offset = config2->ams_enc_offset_3;
 
 }
 
