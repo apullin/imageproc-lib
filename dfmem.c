@@ -62,6 +62,7 @@
 #include "dfmem.h"
 #include "spi_controller.h"        // For DMA
 #include "utils.h"
+#include "robot_config.h"
 
 // Flash geometry
 // 8 Mbit
@@ -500,7 +501,13 @@ void dfmemZeroIndex()
 {
     currentBuffer = 0;
     currentBufferOffset = 0;
+#ifdef ROBOT_CONFIG_H
+#ifdef SETTINGS_USE_FLASH_CONFIG
+    nextPage = 1;
+#endif
+#else
     nextPage = 0;
+#endif
 }
 
 uint64_t dfmemGetUnqiueID(){

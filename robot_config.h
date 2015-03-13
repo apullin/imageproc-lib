@@ -17,14 +17,12 @@ typedef struct {
     //Leg setup
     unsigned char left_legs_pid_num;
     unsigned char left_legs_enc_num;
-
     unsigned char left_legs_enc_flip;
     unsigned char left_legs_pwm_flip;
     unsigned char left_legs_tih_chan;
     //right legs
     unsigned char right_legs_pid_num;
     unsigned char right_legs_enc_num;
-
     unsigned char right_legs_flip;
     unsigned char right_legs_pwm_flip;
     unsigned char right_legs_tih_chan;
