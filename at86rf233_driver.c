@@ -48,7 +48,7 @@
 #include "payload.h"
 #include "spi.h"                // SFRs
 #include "radio.h"              // Need radio status codes
-#include "spi_controller.h"
+#include "spi_controller-freertos.h"
 #include "utils.h"
 
 #include <string.h>
@@ -90,7 +90,7 @@ static unsigned char trxReadSubReg(unsigned char addr, unsigned char mask, unsig
 // =========== Static variables ===============================================
 
 static unsigned char is_ready = 0; // Mostly for debugging - no checking so code is faster
-static TrxIrqHandler irqCallback;
+static TrxIrqHandler irqCallback;  //TODO: This should be changed to a compile-time macro, not a callback
 // See at86rf231.h
 static tal_trx_status_t trx_state;
 static unsigned char frame_buffer[FRAME_BUFFER_SIZE];
@@ -409,6 +409,8 @@ static unsigned char trxReadSubReg(unsigned char addr, unsigned char mask, unsig
 
 void __attribute__((interrupt, no_auto_psv)) _INT4Interrupt(void) {
 
+    _INT4IF = 0;                                // Clear interrupt flag
+    
     unsigned char irq_cause, status;
     irq_cause = 0;
     status = 0xFF;
@@ -457,7 +459,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT4Interrupt(void) {
         }
     }
 
-    _INT4IF = 0;                                // Clear interrupt flag
+    
 
 }
 
@@ -465,19 +467,21 @@ static void trxSpiCallback(unsigned int interrupt_code) {
 
     if(interrupt_code == SPIC_TRANS_SUCCESS) {
 
-        spic1EndTransaction(); // End previous transaction
-
         if(trx_state == RX_AACK_ON) {
             trxReadBuffer();
+            //Only release SPI1 when data is safely out of buffer
+            spic1EndTransactionFromISR(); // End previous transaction
             irqCallback(RADIO_RX_SUCCESS);
 
         } else if(trx_state == TX_ARET_ON) {
 
+            spic1EndTransactionFromISR(); // End previous transaction
             // Packet was successfully transferred to the radio buffer
             // Do something?
 
         }
-
+        
+        
     } else if(interrupt_code == SPIC_TRANS_TIMEOUT) {
 
         // This is indicative of some form of failure!
@@ -499,7 +503,7 @@ static void trxFillBuffer(void) {
     //current_phy_len = spic1Receive(); // Read physical frame size
     //spic1MassTransmit(current_phy_len, NULL, current_phy_len*3); // DMA rest into buffer
     spic1MassTransmit(FRAME_BUFFER_SIZE, NULL, FRAME_BUFFER_SIZE*3); // DMA entire frame buffer into memory
-
+    //Now we expect to hit trxSpiCallback when spi read back is complete.
 }
 
 /**
