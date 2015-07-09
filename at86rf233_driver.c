@@ -473,7 +473,7 @@ static void trxSpiCallback(unsigned int interrupt_code) {
             spic1EndTransactionFromISR(); // End previous transaction
             irqCallback(RADIO_RX_SUCCESS);
 
-        } else if(trx_state == TX_ARET_ON) {
+        } else if((trx_state == TX_ARET_ON) || (trx_state == BUSY_TX_ARET)) {
 
             spic1EndTransactionFromISR(); // End previous transaction
             // Packet was successfully transferred to the radio buffer
