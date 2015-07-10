@@ -41,9 +41,11 @@
  *    No-Clock (sleep) RX listening mode not yet implemented
  */
 
+#include <xc.h>
+#include <ports.h>
+
 #include "at86rf233.h"  // Current transceiver IC
 #include "at86rf231_driver.h"
-#include "ports.h"
 #include "mac_packet.h"
 #include "payload.h"
 #include "spi.h"                // SFRs

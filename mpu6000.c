@@ -43,12 +43,13 @@
  * - This module uses an SPI port for communicating with the chip
  */
 
-#include "mpu6000.h"
+#include <xc.h>
 #include "ports.h"
-#include "spi.h"
 #include "spi_controller-freertos.h"
+#include "spi.h"
 #include "utils.h"
 #include <string.h>
+#include "mpu6000.h"
 
 // Read/Write Access
 #define READ (128)
@@ -97,7 +98,7 @@ static struct {
 static void writeReg(unsigned char regaddr, unsigned char data );
 static unsigned char readReg(unsigned char regaddr);
 static inline void setupSPI(char initConfig);
-static void mpuFinishUpdate(unsigned int cause);
+static void mpuSpiCallback(unsigned int cause);
 static void waitDmaFinish(void);
 
 
@@ -139,7 +140,9 @@ void mpuSetup(void) {
 
   setupSPI(0);  // Setup SPI for highspeed data readback. Can do 20MHz, set for 13
   //setupSPI(1); //slow spi for debug
-  mpuRunCalib(1000, 1000);
+  
+  //Calib done in task after startup, when scheduler is started
+  //mpuRunCalib(1000, 1000);
 }
 
 void mpuRunCalib(unsigned int discard, unsigned int count) {
@@ -245,7 +248,7 @@ void mpuBeginUpdate(void) {
   spic2MassTransmit(UPDATE_SIZE, NULL, 1000);
 }
 
-static void mpuFinishUpdate(unsigned int cause) {
+static void mpuSpiCallback(unsigned int cause) {
   //TODO(rqou): don't ignore cause
   unsigned char buff[UPDATE_SIZE], i, temp;
 
@@ -342,5 +345,5 @@ static inline void setupSPI(char initConfig)
                       SEC_PRESCAL_4_1);
     }
 
-    spic2SetCallback(MPU_CS, &mpuFinishUpdate);
+    spic2SetCallback(MPU_CS, &mpuSpiCallback);
 }
