@@ -161,6 +161,10 @@ static inline void dfmemWriteByte (unsigned char byte);
 static inline unsigned char dfmemReadByte (void);
 static inline void dfmemSelectChip(void);
 static inline void dfmemDeselectChip(void);
+static inline void dfmemSelectChip(void);
+static inline void dfmemBeginTransaction(void);
+static inline void dfmemEndTransaction(void);
+static inline void dfmemEndTransactionFromISR(void);
 static void dfmemSetupPeripheral(void);
 static void dfmemGeometrySetup(void);
 static void dfmemReadSecurityRegister(void);
@@ -203,13 +207,15 @@ void dfmemWrite (unsigned char *data, unsigned int length, unsigned int page,
     MemAddr.address = (((unsigned long)page) << dfmem_geo.byte_address_bits) + byte;
 
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
     dfmemWriteByte(command);
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
     spic2MassTransmit(length, data, 2*length);
+    //Transaction will be ended by SPI DMA interrupt
     //while (length--) { dfmemWriteByte(*data++); }
     //dfmemDeselectChip();
 }
@@ -232,7 +238,8 @@ void dfmemWriteBuffer (unsigned char *data, unsigned int length,
 
 //    CRITICAL_SECTION_START
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(command);
     dfmemWriteByte(MemAddr.chr_addr[2]);
@@ -263,7 +270,8 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
 
 //    CRITICAL_SECTION_START
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(command);
     dfmemWriteByte(MemAddr.chr_addr[2]);
@@ -273,7 +281,8 @@ void dfmemWriteBuffer2MemoryNoErase (unsigned int page, unsigned char buffer)
             
     currentBufferOffset = 0;
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 void dfmemRead(unsigned int page, unsigned int byte, unsigned int length,
@@ -288,7 +297,8 @@ void dfmemRead(unsigned int page, unsigned int byte, unsigned int length,
 
 //    CRITICAL_SECTION_START;
     // Read data from memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(READ_PAGE);
     dfmemWriteByte(MemAddr.chr_addr[2]);
@@ -329,14 +339,16 @@ void dfmemReadPage2Buffer (unsigned int page, unsigned char buffer)
     MemAddr.address = ((unsigned long)page) << dfmem_geo.byte_address_bits;
 
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(command);
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 void dfmemErasePage (unsigned int page)
@@ -347,14 +359,16 @@ void dfmemErasePage (unsigned int page)
     MemAddr.address = ((unsigned long)page) << dfmem_geo.byte_address_bits;
 
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(ERASE_PAGE);
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 void dfmemEraseBlock (unsigned int page)
@@ -365,14 +379,16 @@ void dfmemEraseBlock (unsigned int page)
     MemAddr.address = ((unsigned long)page) << dfmem_geo.byte_address_bits;
 
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(ERASE_BLOCK);
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 void dfmemEraseSector (unsigned int page)
@@ -384,14 +400,16 @@ void dfmemEraseSector (unsigned int page)
     MemAddr.address = ((unsigned long)page) << dfmem_geo.byte_address_bits;
 
     // Write data to memory
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(ERASE_SECTOR);
     dfmemWriteByte(MemAddr.chr_addr[2]);
     dfmemWriteByte(MemAddr.chr_addr[1]);
     dfmemWriteByte(MemAddr.chr_addr[0]);
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 //    CRITICAL_SECTION_END
 }
 
@@ -399,14 +417,16 @@ void dfmemEraseChip (void)
 {
     while(!dfmemIsReady());
 
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(0xC7);
     dfmemWriteByte(0x94);
     dfmemWriteByte(0x80);
     dfmemWriteByte(0x9A);
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 unsigned char dfmemIsReady (void)
@@ -419,12 +439,14 @@ unsigned char dfmemGetStatus (void)
 //    CRITICAL_SECTION_START
     unsigned char byte;
 
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(0xD7);
     byte = dfmemReadByte();
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 //    CRITICAL_SECTION_END
     return byte;
 }
@@ -436,12 +458,14 @@ unsigned char dfmemGetManufacturerID (void)
 {
     unsigned char byte;
 
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(0x9F);
     byte = dfmemReadByte();
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 
     return byte;
 }
@@ -453,29 +477,35 @@ unsigned char dfmemGetChipSize (void)
 {
     unsigned char byte;
 
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
 
     dfmemWriteByte(0x9F);
     byte = dfmemReadByte(); // Manufacturer ID, not needed
     byte = dfmemReadByte() & 0b00011111;
 
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 
     return byte;
 }
 
 void dfmemDeepSleep()
 {
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
     dfmemWriteByte(0xB9);
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 void dfmemResumeFromDeepSleep()
 {
-    dfmemSelectChip();
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
     dfmemWriteByte(0xAB);
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
 }
 
 void dfmemSave(unsigned char* data, unsigned int length) { //If this write will not fit into the buffer, then
@@ -519,30 +549,22 @@ uint64_t dfmemGetUnqiueID(){
     uint64_t id = *((uint64_t*)(factorySecRegID));
     return id;
 }
-
 /*-----------------------------------------------------------------------------
  *          Private functions
 -----------------------------------------------------------------------------*/
 
 void spiCallback(unsigned int irq_source) {
 
-    if(readoutLocation != NULL){
+    if (readoutLocation != NULL) {
         spic2ReadBuffer(expectedReadbackSize, readoutLocation);
     }
 
-    dfmemDeselectChip();
-
-    /*if(irq_source == SPIC_TRANS_SUCCESS) {
-
-        dfmemDeselectChip();
-
-    } else if(irq_source == SPIC_TRANS_TIMEOUT) {
-
-        spic2Reset();   // Reset hardware
-
+    if (irq_source == SPIC_TRANS_SUCCESS) {
+        //dfmemDeselectChip();
+        spic2EndTransactionFromISR(); //Does chip deselect
+    } else if (irq_source == SPIC_TRANS_TIMEOUT) {
+        spic2Reset(); // Reset hardware
     }
-     */
-    //TODO(rqou): don't ignore cause
 
 }
 
@@ -569,10 +591,26 @@ static inline unsigned char dfmemReadByte (void)
 }
 
 // Selects the memory chip.
-static inline void dfmemSelectChip(void) { spic2BeginTransaction(DFMEM_CS); }
+static inline void dfmemSelectChip(void) { 
+    spic2BeginTransaction(DFMEM_CS);
+}
 
 // De-selects the memory chip.
-static inline void dfmemDeselectChip(void) { spic2EndTransaction(); }
+static inline void dfmemDeselectChip(void) {
+    spic2Deselect();
+}
+
+static inline void dfmemBeginTransaction(void){
+    spic2BeginTransaction(DFMEM_CS);
+}
+
+static inline void dfmemEndTransaction(void){
+    spic2EndTransaction();
+}
+
+static inline void dfmemEndTransactionFromISR(void){
+    spic2EndTransactionFromISR();
+}
 
 // Initializes the SPIx bus for communicating with the memory.
 //
@@ -651,8 +689,9 @@ static void dfmemReadSecurityRegister(void){
 
     int i; // Loop variable, MPLABX is not C99 standard
 
-    dfmemSelectChip();
-
+    //dfmemSelectChip();
+    dfmemBeginTransaction();
+    
     dfmemWriteByte(0x77); //Read security register opcode
     dfmemWriteByte(0x77); //Dummy write, 3 bytes required for opcode 0x77
     dfmemWriteByte(0x77); //Dummy write, 3 bytes required for opcode 0x77
@@ -667,6 +706,11 @@ static void dfmemReadSecurityRegister(void){
     for(i = 0; i < 64; i++){
         factorySecRegID[i] = dfmemReadByte();
     }
-    dfmemDeselectChip();
+    //dfmemDeselectChip();
+    dfmemEndTransaction();
+}
 
+void dfmemWaitDMAFinish(void) {
+  spic2BeginTransaction(DFMEM_CS);
+  spic2EndTransaction();
 }

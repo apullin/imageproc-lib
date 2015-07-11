@@ -221,4 +221,7 @@ void dfmemZeroIndex();
 // of a 64-byte array
 uint64_t dfmemGetUnqiueID();
 
+//Waits for current lock on SPI2 to finish
+void dfmemWaitDMAFinish(void);
+
 #endif // __DFMEM_H

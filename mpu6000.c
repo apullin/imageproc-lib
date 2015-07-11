@@ -246,6 +246,7 @@ void mpuBeginUpdate(void) {
   spic2Transmit(MPU_REG_XLBASE | READ);
   //TODO(rqou): better timeout?
   spic2MassTransmit(UPDATE_SIZE, NULL, 1000);
+  //Transaction ended by SPI DMA interrupt, calling mpuSpiCallback
 }
 
 static void mpuSpiCallback(unsigned int cause) {
@@ -253,8 +254,7 @@ static void mpuSpiCallback(unsigned int cause) {
   unsigned char buff[UPDATE_SIZE], i, temp;
 
   spic2ReadBuffer(UPDATE_SIZE, buff);
-  spic2EndTransaction();
-
+  
   // Order is XL[6] TEMP[2] GYRO[6]
   //reverse endianness
   for(i = 0; i < UPDATE_SIZE; i += 2) {
@@ -267,6 +267,9 @@ static void mpuSpiCallback(unsigned int cause) {
   memcpy(mpu_data.gyro_data, buff + 8, 6);
   memcpy(&mpu_data.temp, buff + 6, 2);
   memcpy(mpu_data.xl_data, buff, 6);
+  
+  //TODO: Should this be here, or earlier?
+  spic2EndTransactionFromISR();
 
 }
 
