@@ -70,7 +70,7 @@
 #define MAC_HEADER_LENGTH       (9)
 #define CRC_LENGTH              (2)
 #define FRAME_BUFFER_SIZE       (128)
-#define DEFAULT_CSMA_RETRIES    (4)     /** Number of times to attempt medium acquisition */
+#define DEFAULT_CSMA_RETRIES    (3)     /** Number of times to attempt medium acquisition */
 #define DEFAULT_FRAME_RETRIES   (0)     /** Number of times to attempt frame resend */
 
 // =========== Function stubs =================================================
@@ -84,6 +84,7 @@ static inline void trxSetSlptr(unsigned char);
 
 static void trxWriteReg(unsigned char addr, unsigned char val);
 static unsigned char trxReadReg(unsigned char addr);
+static unsigned char trxReadRegFromISR(unsigned char addr);
 
 static void trxWriteSubReg(unsigned char addr, unsigned char mask, unsigned char pos, unsigned char val);
 static unsigned char trxReadSubReg(unsigned char addr, unsigned char mask, unsigned char pos);
@@ -206,7 +207,7 @@ unsigned char trxReadRSSI(void) {
 
 unsigned char trxReadED(void) {
 
-    return trxReadReg(RG_PHY_ED_LEVEL);
+    return trxReadRegFromISR(RG_PHY_ED_LEVEL);
 
 }
 
@@ -279,7 +280,11 @@ void trxSetStateTx(void) {
     }
 
     trxWriteSubReg(SR_TRX_CMD, CMD_TX_ARET_ON); // Begin transition
+__TRACE(0x40);
+    
     while(trxReadSubReg(SR_TRX_STATUS) != TX_ARET_ON);  // Wait for completion
+__TRACE(0x41);
+    
     trx_state = TX_ARET_ON; // Update state
 
     //CRITICAL_SECTION_END;
@@ -294,10 +299,11 @@ void trxSetStateRx(void) {
         //CRITICAL_SECTION_END;
         return;
     }
-
+    
     trxWriteSubReg(SR_TRX_CMD, CMD_RX_AACK_ON); // Begin transition
     while(trxReadSubReg(SR_TRX_STATUS) != RX_AACK_ON);  // Wait for completion
     trx_state = RX_AACK_ON; // Update state
+__TRACE(0x42);
 
     //CRITICAL_SECTION_END;
 
@@ -371,6 +377,17 @@ static unsigned char trxReadReg(unsigned char addr) {
 
 }
 
+static unsigned char trxReadRegFromISR(unsigned char addr) {
+
+    unsigned char c;
+    spic1BeginTransactionFromISR(TRX_CS);
+    spic1Transmit(TRX_CMD_RR | addr);
+    c = spic1Receive();
+    spic1EndTransactionFromISR();
+    return c;
+
+}
+
 /**
  * Write bits to a transceiver subregister.
  *
@@ -412,60 +429,86 @@ static unsigned char trxReadSubReg(unsigned char addr, unsigned char mask, unsig
 void __attribute__((interrupt, no_auto_psv)) _INT4Interrupt(void) {
 
     _INT4IF = 0;                                // Clear interrupt flag
+__TRACE(0x43);
     
     unsigned char irq_cause, status;
     irq_cause = 0;
     status = 0xFF;
 
-    irq_cause = trxReadReg(RG_IRQ_STATUS);    // Read and clear irq source
+    //forcefully take control of the SPI bus to immediately service the radio
+    //This is poor design, there must be a better way of doing this?
+    //spic1EndTransactionFromISR();
+    
+    //irq_cause = trxReadReg(RG_IRQ_STATUS);    // Read and clear irq source
+    irq_cause = trxReadRegFromISR(RG_IRQ_STATUS);    // Read and clear irq source
 
     if(irq_cause & TRX_IRQ_3_TRX_END) {
+__TRACE(0x44);
 
         status = trxReadSubReg(SR_TRAC_STATUS); // Determine transaction status
 
         // Transmit complete case
         if(trx_state == BUSY_TX_ARET) {
+__TRACE(0x45);
 
             trx_state = TX_ARET_ON; // State transition
 
             if(status == TRAC_SUCCESS) {
+__TRACE(0x46);
+                
                 last_ackd = 1;
                 irqCallback(RADIO_TX_SUCCESS);
             } else if(status == TRAC_SUCCESS_DATA_PENDING) {
+__TRACE(0x47);
+                
                 irqCallback(RADIO_TX_SUCCESS);
             } else if(status == TRAC_CHANNEL_ACCESS_FAILURE) {
+__TRACE(0x48);
+                
                 irqCallback(RADIO_TX_FAILURE);
             } else if(status == TRAC_NO_ACK) {
+__TRACE(0x49);
+                
                 last_ackd = 0;
                 irqCallback(RADIO_TX_FAILURE);
             } else if(status == TRAC_INVALID) {
+__TRACE(0x4a);
+                
                 irqCallback(RADIO_TX_FAILURE);
             }
 
         } else if(trx_state == RX_AACK_ON) {
+__TRACE(0x4b);
 
             // crc_valid = trxReadSubReg(SR_RX_CRC_VALID);
             // if(!crc_valid) {
             //    Drop packet if invalid
             // }
             if(status == TRAC_SUCCESS) {
+__TRACE(0x4c);
+                
                 trxFillBuffer();
                 irqCallback(RADIO_RX_START);
             } else if(status == TRAC_SUCCESS_WAIT_FOR_ACK) {
+__TRACE(0x4d);
+                
                 trxFillBuffer();
                 irqCallback(RADIO_RX_START);
                 // TODO: Add support for proper slotted ACK operation
             } else if(status == TRAC_INVALID) {
+                
                 irqCallback(RADIO_RX_FAILURE);
             }
         }
     }
 
+__TRACE(0x4e);
     
 
 }
 
 static void trxSpiCallback(unsigned int interrupt_code) {
+__TRACE(0x4f);
 
     if(interrupt_code == SPIC_TRANS_SUCCESS) {
 
@@ -473,6 +516,8 @@ static void trxSpiCallback(unsigned int interrupt_code) {
             trxReadBuffer();
             //Only release SPI1 when data is safely out of buffer
             spic1EndTransactionFromISR(); // End previous transaction
+__TRACE(0x50);
+            
             irqCallback(RADIO_RX_SUCCESS);
 
         } else if((trx_state == TX_ARET_ON) || (trx_state == BUSY_TX_ARET)) {
@@ -491,6 +536,7 @@ static void trxSpiCallback(unsigned int interrupt_code) {
         irqCallback(RADIO_HW_FAILURE);
 
     }
+__TRACE(0x51);
 
 }
 
@@ -500,7 +546,7 @@ static void trxSpiCallback(unsigned int interrupt_code) {
  */
 static void trxFillBuffer(void) {
 
-    spic1BeginTransaction(TRX_CS);
+    spic1BeginTransactionFromISR(TRX_CS);
     last_rssi = spic1Transmit(TRX_CMD_FR);  // Begin write (returns RSSI because of SPI_CMD_MODE)
     //current_phy_len = spic1Receive(); // Read physical frame size
     //spic1MassTransmit(current_phy_len, NULL, current_phy_len*3); // DMA rest into buffer
