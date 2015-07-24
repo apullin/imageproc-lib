@@ -1050,7 +1050,8 @@ typedef enum trx_trac_status_tag
 
     /** Constant TRAC_INVALID for sub-register @ref SR_TRAC_STATUS */
     TRAC_INVALID = (7)
-} SHORTENUM trx_trac_status_t;
+//} SHORTENUM trx_trac_status_t;
+} trx_trac_status_t;
 
 
 
